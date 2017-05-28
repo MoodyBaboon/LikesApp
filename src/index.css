@@ -61,12 +61,26 @@ body {
   margin: 0 1%;
 }
 
-
 .find-input {
   width: 70% !important;
 }
 .find-btn {
   width: 30% !important;
+}
+
+/* Post */
+.post {
+  margin: 20px 0;
+}
+
+.post-description {
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.likes {
+  font-weight: 700;
+  font-size: 18px;
 }
 
 /* Spinner */
@@ -210,6 +224,10 @@ body {
 
 .w100 {
   width: 100% !important;
+}
+
+.mt10 {
+  margin-top: 10px;
 }
 
 .to-top {

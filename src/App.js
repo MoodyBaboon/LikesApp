@@ -63,7 +63,7 @@ class WeatherDisplay extends Component {
             <div>
                 <div className="fade-in">
                     {weatherData.map((post, index) => (
-                        <div key={index}>
+                        <div key={index} className="post">
                             <div className="filler fade-in"></div>
                             <LazyLoad offsetVertical={500}>
                                 <div>
@@ -75,13 +75,20 @@ class WeatherDisplay extends Component {
                                          className="fade-in border-radius"/>
                                 </div>
                             </LazyLoad>
-                            <p className={post.attachments && post.attachments[1] && post.attachments[1].audio ? '' : 'none'}>
-                                {post.attachments && post.attachments[1] && post.attachments[1].audio ? post.attachments[1].audio.artist : ''}
-                                {' '}- {post.attachments && post.attachments[1] && post.attachments[1].audio ? post.attachments[1].audio.title : ''}
-                            </p>
-                            <p>Description: {post.text}</p>
-                            <p>{post.likes.count} <span className="glyphicon glyphicon-heart-empty"></span></p>
-                            <a href={`https://vk.com/${this.props.domain}?w=wall${post.from_id}_${post.id}`} target="_blank">Show More</a>
+                            <p className="post-description">{post.text}</p>
+                            {post.attachments ? post.attachments.map((item, index) => {
+                                if (item.type === 'audio') {
+                                    return <p key={index}>{item.audio.artist} - {item.audio.title}</p>
+                                } else if (item.type === 'video') {
+                                    return <div key={index}>
+                                        <img src={item.video.photo_320} alt=""/>
+                                        <p className="mt10">{item.video.title}</p>
+                                    </div>
+                                }
+                                else return <div key={index}></div>
+                            }) : ''}
+                            <p className="likes">{post.likes.count} <span className="glyphicon glyphicon-heart"></span></p>
+                            <a href={`https://vk.com/${this.props.domain}?w=wall${post.from_id}_${post.id}`} target="_blank">More</a>
                         </div>
                     ))}
                 </div>
