@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import LazyLoad from 'react-lazy-load';
 import ScrollToTop from 'react-scroll-up';
+import fetchJsonp from 'fetch-jsonp';
 
 import './App.css';
 import Spinner from './components/Spinner'
@@ -40,13 +41,20 @@ class WeatherDisplay extends Component {
 
     fetchData(domain) {
         const URL = `https://api.vk.com/method/wall.get?domain=${domain}&v=5.64&count=100`;
-        fetch(URL).then(res => res.json()).then(json => {
-            this.setState({ weatherData: json.response.items });
-            this.setState({
-                sortedData: this.state.weatherData.sort(this.sortByLikes)
+
+        this.setState({ isLoading: true });
+        fetchJsonp(URL)
+            .then(res => res.json())
+            .then(json => {
+                this.setState({ weatherData: json.response.items, isLoading: false  });
+                this.setState({
+                    sortedData: this.state.weatherData.sort(this.sortByLikes)
+                });                
+            })
+            .catch(error => {
+                console.error(error);
+                this.setState({ sortedData: 'empty' });
             });
-            console.log(this.state.sortedData);
-        });
     }
 
     sortByLikes = function(a,b) {
@@ -56,8 +64,12 @@ class WeatherDisplay extends Component {
     };
     render() {
         const weatherData = this.state.sortedData;
+
         if (!weatherData) return (
             <Spinner />
+        );
+        if (weatherData === 'empty' ) return (
+            <div>Something went wrong. Try to turn on VPN and reload the page.</div>
         );
         return (
             <div>
@@ -109,7 +121,9 @@ class App extends Component {
             newGroup: null,
             isLoading: false,
             alreadyInListError: false,
-            test: false
+            fetchError: false,
+            test: false,
+            newGroupError: false
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -118,23 +132,37 @@ class App extends Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        this.setState({ isLoading: true });
+        this.setState({
+            isLoading: true,
+            newGroup: null
+        });
         const groupId = this.refs.groupId.value;
         const URL = "https://api.vk.com/method/groups.getById?group_id=" +
             groupId +
             "&v=5.64&fields=description,members_count";
-        fetch(URL)
-            .then(res => res.json())
-            .then(json => {
-                console.log('json',json);
-                this.setState({
+        fetchJsonp(URL)
+            .then(res => {
+                return res.json();
+            })
+            .then(json => {                
+                if (json && json.error) {
+                    this.setState({
+                        newGroupError: true,
+                        isLoading: false
+                    })
+                }
+                else this.setState({
                     newGroup: json.response ? json.response[0] : null,
-                    isLoading: false
+                    isLoading: false,
+                    newGroupError: false
                 });
             })
             .catch(error => {
-                console.error(error);
-                this.setState({ isLoading: false });
+                //console.error(error);
+                this.setState({
+                    isLoading: false,
+                    fetchError: true
+                });
             });
     }
 
@@ -235,7 +263,11 @@ class App extends Component {
                                         {this.state.alreadyInListError ? <div>Already in list</div> : ''}
                                     </div>
                                     :
-                                    <div>{this.state.isLoading ? <Spinner /> : ''}</div>
+                                    <div>
+                                        {this.state.isLoading ? <Spinner /> : ''}
+                                        {this.state.fetchError ? <div>Something went wrong. Try to turn on VPN and reload the page.</div> : ''}
+                                        {this.state.newGroupError ? <div>Can't find information about group. Try to enter correct name.</div> : ''}
+                                    </div>
                                 }
                             </form>
                         </Col>
