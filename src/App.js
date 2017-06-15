@@ -40,7 +40,7 @@ class WeatherDisplay extends Component {
     }
 
     fetchData(domain) {
-        const URL = `https://api.vk.com/method/wall.get?domain=${domain}&v=5.64&count=100`;
+        const URL = `https://api.vk.com/method/wall.get?domain=${domain}&v=5.64&count=100&access_token=f840ba08f840ba08f840ba0859f81c0d83ff840f840ba08a10260470c008425f33e5a07`;
 
         this.setState({ isLoading: true });
         fetchJsonp(URL)
